@@ -1,15 +1,21 @@
-# Copyright 2020-2021 Seagate
-#
-# This copyrighted material is made available to anyone wishing to use,
-# modify, copy, or redistribute it subject to the terms and conditions
-# of the GNU General Public License v2 or (at your option) any later version.
-#
+# SPDX-License-Identifier: LGPL-2.1-only
+# Copyright (C) 2021 Seagate Technology LLC and/or its Affiliates.
+
 include ../Makefile.config
 include ../Makefile.common
 
 TARGET = seagate_ilm
 HEADER_TARGET = ilm.h
 LIB_TARGET = libseagate_ilm
+
+VER := $(shell cat ../VERSION)
+
+GIT_INFO := $(shell git rev-parse --is-inside-work-tree >/dev/null; echo $$?)
+ifeq ($(GIT_INFO),0)
+VER := "$(shell git describe --abbrev=12 --dirty --always --tags)"
+endif
+
+CFLAGS += -DVERSION=\"$(VER)\"
 
 SOMAJOR=0
 SOMINOR=1
@@ -27,7 +33,9 @@ SOURCE = main.c \
 	 raid_lock.c \
 	 inject_fault.c \
 	 failure.c \
-	 drive.c
+	 drive.c \
+	 scsiutils.c \
+	 uuid.c
 
 LIB_SOURCE = lib_client.c
 
