@@ -1,21 +1,15 @@
-# SPDX-License-Identifier: LGPL-2.1-only
-# Copyright (C) 2021 Seagate Technology LLC and/or its Affiliates.
-
+# Copyright 2020-2021 Seagate
+#
+# This copyrighted material is made available to anyone wishing to use,
+# modify, copy, or redistribute it subject to the terms and conditions
+# of the GNU General Public License v2 or (at your option) any later version.
+#
 include ../Makefile.config
 include ../Makefile.common
 
 TARGET = seagate_ilm
 HEADER_TARGET = ilm.h
 LIB_TARGET = libseagate_ilm
-
-VER := $(shell cat ../VERSION)
-
-GIT_INFO := $(shell git rev-parse --is-inside-work-tree >/dev/null; echo $$?)
-ifeq ($(GIT_INFO),0)
-VER := "$(shell git describe --abbrev=12 --dirty --always --tags)"
-endif
-
-CFLAGS += -DVERSION=\"$(VER)\"
 
 SOMAJOR=0
 SOMINOR=1
@@ -33,9 +27,7 @@ SOURCE = main.c \
 	 raid_lock.c \
 	 inject_fault.c \
 	 failure.c \
-	 drive.c \
-	 scsiutils.c \
-	 uuid.c
+	 drive.c
 
 LIB_SOURCE = lib_client.c
 
@@ -78,12 +70,15 @@ HEADIR=/usr/include
 install: all
 	$(INSTALL) -d $(DESTDIR)/$(BINDIR)
 	$(INSTALL) -d $(DESTDIR)/$(LIBDIR)
+	$(INSTALL) -d $(DESTDIR)/$(LIBDIR)/pkgconfig
 	$(INSTALL) -d $(DESTDIR)/$(HEADIR)
+	$(INSTALL) -d $(DESTDIR)/usr/lib/systemd/system
+	$(INSTALL) -d $(DESTDIR)/etc/logrotate.d/seagate_ilm
 	$(INSTALL) -c -m 755 $(TARGET) $(DESTDIR)/$(BINDIR)
 	$(INSTALL) -c -m 755 $(LIBSO_TARGET) $(DESTDIR)/$(LIBDIR)
 	$(INSTALL) -c -m 644 $(LIBPC_TARGET) $(DESTDIR)/$(LIBDIR)/pkgconfig
 	cp -a $(LIB_TARGET).so $(DESTDIR)/$(LIBDIR)
 	cp -a $(LIB_TARGET).so.$(SOMAJOR) $(DESTDIR)/$(LIBDIR)
 	$(INSTALL) -c -m 644 $(HEADER_TARGET) $(DESTDIR)/$(HEADIR)
-	$(INSTALL) -c -m 644 seagate_ilm.service /usr/lib/systemd/system/
-	$(INSTALL) -c -m 644 logrotate.ilm /etc/logrotate.d/seagate_ilm
+	$(INSTALL) -c -m 644 seagate_ilm.service $(DESTDIR)/usr/lib/systemd/system/
+	$(INSTALL) -c -m 644 logrotate.ilm $(DESTDIR)/etc/logrotate.d/seagate_ilm
